@@ -25,7 +25,7 @@ public class Node {
         
     @Override
     public String toString(){
-        return "["+this.x+", "+this.y+"]";
+        return "("+this.x+", "+this.y+")";
     }
     
     public static void setBlocked(Node n){
@@ -42,5 +42,9 @@ public class Node {
     
     public boolean isGoal(){
         return this.isGoal;
+    }
+    
+    public void setHeuristic(int endX, int endY){
+        this.heuristicCost = Math.abs(x - endX)+Math.abs(y - endY);
     }
 }

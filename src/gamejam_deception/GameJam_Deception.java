@@ -23,7 +23,6 @@ import java.util.Scanner;
 public class GameJam_Deception extends JFrame implements ActionListener {
     
     private JLabel[][] board; // Our game board where we display comp or obstacles
-    private Nodes[][] nodes;
     
     
     // DeceptionDungeon Content //
@@ -43,22 +42,22 @@ public class GameJam_Deception extends JFrame implements ActionListener {
         n = null;
     }
     
-    public static void setStartNode(int x, int y){
-        compX = x;
-        compY = y;
-    }
-    
-    public static void setEndNode(int x, int y){
-        endX = x;
-        endY = y;
-    }
-    
-    static void checkAndUpdateCost(Node current, Node t, int cost){
-        if(t == null || closed[t.x][t.y])return;
-        int t_final_cost = t.heuristicCost+cost;
+    /*
+        params:
+            @current: current node being tested
+            @t: the next node of the path
+            @cost: the cost of total travel to current
         
+    */
+    static void findAndSetCosts(Node current, Node t, int cost){
+        // Add to closed if null node
+        if(t == null || closed[t.x][t.y])return;
+        
+        // Get cost and find if node in open set
+        int t_final_cost = t.heuristicCost+cost;
         boolean inOpen = open.contains(t);
-        if(!inOpen || t_final_cost<t.finalCost){
+        
+        if(!inOpen || t_final_cost < t.finalCost){
             t.finalCost = t_final_cost;
             t.parent = current;
             if(!inOpen)open.add(t);
@@ -76,8 +75,6 @@ public class GameJam_Deception extends JFrame implements ActionListener {
     public static int height = 10; // Game board width and height
     public static int compX = 0;
     public static int compY = 0; // Computer start position x and y coordinates
-    //public static int destX = width-1;
-    //public static int destY = height-1;
     private boolean play ,pause;
     
     public GameJam_Deception(){
@@ -89,27 +86,16 @@ public class GameJam_Deception extends JFrame implements ActionListener {
         boardPanel.setBorder(BorderFactory.createEmptyBorder(2,2,2,2));
         
         board = new JLabel[height][width];
-        nodes = new Nodes[height][width];
-        
         
         // default computer start position
         computer = new Mover(compX, compY);
         
         // loop through y coord of board to initialize board spaces
-        for(int y = height-1; y >=0 ; y--){
-            for(int x =0 ; x < width ; x++){
-                board[y][x] = new JLabel(" ", JLabel.CENTER);   // 'blank' space filled in for each piece of the board
-                board[y][x].setOpaque(true);
-                boardPanel.add(board[y][x]);                    // add the new empty space to our boardPanel
-                nodes[y][x] = new Nodes(x, y, endX, endY);    // initialize nodes
-
-                // Test obstacle placement
-                if(y == height-1 && x == width-1) 
-                    nodes[y][x].assignGoal();
-                else if(y == (height-1)/4 && x == (width-1)/4) 
-                    nodes[y][x].assignFakeGoal();
-                else if(y == (height-3) && x == (width-3)) 
-                    nodes[y][x].assignTrap();
+        for(int x =0 ; x < width ; x++){
+            for(int y = 0; y < height ; y++){
+                board[x][y] = new JLabel(" ", JLabel.CENTER);   // 'blank' space filled in for each piece of the board
+                board[x][y].setOpaque(true);
+                boardPanel.add(board[x][y]);                    // add the new empty space to our boardPanel
             }
         }
 
@@ -135,7 +121,6 @@ public class GameJam_Deception extends JFrame implements ActionListener {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         drawBoard();
-        //calculatePath(compX, compY);
         
         //Timer timer = new Timer();
         //timer.schedule(drawBoard(), 0, 5000);
@@ -161,43 +146,43 @@ public class GameJam_Deception extends JFrame implements ActionListener {
             } 
 
             Node t;  
-            if(current.x-1>=0){
+            if(current.x-1 >= 0){
                 t = grid[current.x-1][current.y];
-                checkAndUpdateCost(current, t, current.finalCost+V_H_COST); 
+                findAndSetCosts(current, t, current.finalCost+V_H_COST); 
 
-                if(current.y-1>=0){                      
+                if(current.y-1 >= 0){                      
                     t = grid[current.x-1][current.y-1];
-                    checkAndUpdateCost(current, t, current.finalCost+DIAGONAL_COST); 
+                    findAndSetCosts(current, t, current.finalCost+DIAGONAL_COST); 
                 }
 
-                if(current.y+1<grid[0].length){
+                if(current.y+1 < grid[0].length){
                     t = grid[current.x-1][current.y+1];
-                    checkAndUpdateCost(current, t, current.finalCost+DIAGONAL_COST); 
+                    findAndSetCosts(current, t, current.finalCost+DIAGONAL_COST); 
                 }
             } 
 
-            if(current.y-1>=0){
+            if(current.y-1 >= 0){
                 t = grid[current.x][current.y-1];
-                checkAndUpdateCost(current, t, current.finalCost+V_H_COST); 
+                findAndSetCosts(current, t, current.finalCost+V_H_COST); 
             }
 
-            if(current.y+1<grid[0].length){
+            if(current.y+1 < grid[0].length){
                 t = grid[current.x][current.y+1];
-                checkAndUpdateCost(current, t, current.finalCost+V_H_COST); 
+                findAndSetCosts(current, t, current.finalCost+V_H_COST); 
             }
 
-            if(current.x+1<grid.length){
+            if(current.x+1 < grid.length){
                 t = grid[current.x+1][current.y];
-                checkAndUpdateCost(current, t, current.finalCost+V_H_COST); 
+                findAndSetCosts(current, t, current.finalCost+V_H_COST); 
 
-                if(current.y-1>=0){
+                if(current.y-1 >= 0){
                     t = grid[current.x+1][current.y-1];
-                    checkAndUpdateCost(current, t, current.finalCost+DIAGONAL_COST); 
+                    findAndSetCosts(current, t, current.finalCost+DIAGONAL_COST); 
                 }
                 
-                if(current.y+1<grid[0].length){
+                if(current.y+1 < grid[0].length){
                    t = grid[current.x+1][current.y+1];
-                    checkAndUpdateCost(current, t, current.finalCost+DIAGONAL_COST); 
+                    findAndSetCosts(current, t, current.finalCost+DIAGONAL_COST); 
                 }  
             }
         } 
@@ -206,8 +191,8 @@ public class GameJam_Deception extends JFrame implements ActionListener {
     // Display player, walls, and other pieces
     public void drawBoard(){
 
-        for (int y = 0 ; y < height ; y++){
-            for (int x = 0 ; x < width ; x++){
+        for (int x = 0 ; x < width ; x++){
+            for (int y = 0 ; y < height ; y++){
                 board[x][y].setBorder(BorderFactory.createLineBorder(Color.BLACK));
                 if (compX == x && compY == y) {
                     board[x][y].setBackground(Color.GREEN);
@@ -218,16 +203,11 @@ public class GameJam_Deception extends JFrame implements ActionListener {
                     board[x][y].setText("GOAL");
                     board[x][y].setBackground(Color.RED);
                 } //.setBackground(Color.BLUE) ;//          //nodes[x][y].isGoal()
-                //else if(nodes[x][y].isTrap()) board[x][y].setText("X");
-                //else if(nodes[x][y].isFakeGoal()) board[x][y].setText("Q");
                 else {
                     board[x][y].setBackground(Color.BLUE);
                     // For debugging node heuristic values:
                     //board[x][y].setText(nodes[x][y].heuristicDisplay());
                 }
-                //else board[x][y].setText(" ");
-                // For debugging path:
-                // else board[x][y].setText(navigation.displayPathCost());
             }
         }
         
@@ -242,43 +222,8 @@ public class GameJam_Deception extends JFrame implements ActionListener {
         
     }
     
-    public void calculatePath(int x, int y){
-        int nextX, nextY;
-        double cheapestPath = nodes[x][y].getHeuristicValue();
-        double nextPath;
-        
-        // Add the current node to the open set
-        //openSet.add(nodes[x][y]);
-        
-        // If current node is not goal, need to find next path
-        if(!nodes[x][y].isGoal()){
-            nextX = x;
-            nextY = y;
-            for(int i = (x-1) ; i <= (x + 1) ; i++){
-                if(inBounds(i)){
-                    for(int j = (y-1) ; j <= (y + 1) ; j++){
-                        if(inBounds(j)){
-                            nextPath = navigation.getCost(nodes[i][j]);
-                            if(nextPath < cheapestPath && !nodes[i][j].isWall()) {
-                                nextX = i;
-                                nextY = j;
-                                cheapestPath = nextPath;
-                            }
-                        }
-                    }
-                }
-                
-            }
-            //calculatePath(nextX, nextY);
-            //navigation.updateTotalCost(cheapestPath);
-            navigation.updateTravel(nodes[nextX][nextY], x, y);
-            // For debugging path:
-            board[nextX][nextY].setBackground(Color.BLUE);
-            board[nextX][nextY].setText(navigation.displayTravel());
-            //board[nextX][nextY].setText(navigation.displayPathCost());
-        }
-    }
     
+    // TODO: implement sound effects
     public void playSound(String soundFilePath, boolean isMP3) {
         
     // .wav files
@@ -309,8 +254,6 @@ public class GameJam_Deception extends JFrame implements ActionListener {
             pause = false;
             startButton.setEnabled(false);
             stopButton.setEnabled(true);
-            //openSet.clear();
-            //calculatePath(compX, compY);
         }
         
         if (e.getSource() == stopButton){
@@ -345,6 +288,13 @@ public class GameJam_Deception extends JFrame implements ActionListener {
         
     }
     
+    /*
+        params:
+            @width = width of board
+            @height = height of board
+            @walls = array of x and y coordinates of walls to be placed on board
+        Output debug map of grid
+    */
     public static void run(int width, int height, int[] walls){ //, int startX, int startY, int goalX, int goalY
             //Reset
            grid = new Node[width][height];
@@ -353,22 +303,20 @@ public class GameJam_Deception extends JFrame implements ActionListener {
                 Node c1 = (Node)o1;
                 Node c2 = (Node)o2;
 
-                return c1.finalCost<c2.finalCost?-1:
-                        c1.finalCost>c2.finalCost?1:0;
+                return c1.finalCost < c2.finalCost?-1:
+                        c1.finalCost > c2.finalCost?1:0;
             });
            //Set start position
-           setStartNode(compX, compY);  //Setting to 0,0 by default. Will be useful for the UI part
+           //setStartNode(compX, compY);
            
            //Set End Location
-           setEndNode(endX, endY); 
+           //setEndNode(endX, endY); 
            
            for(int i=0 ; i < width ; ++i){
               for(int j=0 ; j < height ; ++j){
                   grid[i][j] = new Node(i, j, false);
-                  grid[i][j].heuristicCost = Math.abs(i-endX)+Math.abs(j-endY);
-//                  System.out.print(grid[i][j].heuristicCost+" ");
+                  grid[i][j].setHeuristic(endX, endY);
               }
-//              System.out.println();
            }
            grid[compX][compY].finalCost = 0;
            
@@ -376,48 +324,42 @@ public class GameJam_Deception extends JFrame implements ActionListener {
              Set walls cells. Simply set the cell values to null
              for walls cells.
            */
-           for(int i=0;i < walls.length;i+=2){
+           for(int i=0; i < walls.length ;i+=2){
                int x = walls[i];
                int y = walls[i+1];
-               //setBlocked(grid[x][y]);
                grid[x][y] = null;
            }
            
+           setOpen();
+           System.out.println("Key: ");
+           System.out.println(" O  ... Computer start position");
+           System.out.println(" X  ... Goal position");
+           System.out.println("/// ... Wall");
+           System.out.println(" #  ... Node cost");
            //Display initial map
-           System.out.println("Grid: ");
-            for(int i=0;i<width;++i){
-                for(int j=0;j<height;++j){
-                   if(i == compX && j == compY)System.out.print("SO  "); //Source
-                   else if(i == endX && j == endY)System.out.print("DE  ");  //Destination
-                   else if(grid[i][j]!=null)System.out.printf("%-3d ", 0);
-                   else System.out.print("BL  "); 
+           System.out.println("\nGrid: ");
+            for(int i=0; i < width ;++i){
+                for(int j=0; j < height ;++j){
+                   if(i == compX && j == compY)System.out.print(" O  "); //Start point
+                   else if(i == endX && j == endY)System.out.print(" X  ");  //Goal
+                   else if(grid[i][j]!=null)System.out.printf("%-3d ", grid[i][j].finalCost);
+                   else System.out.print("/// "); 
                 }
                 System.out.println();
             } 
             System.out.println();
            
-           setOpen();
-           System.out.println("\nScores for cells: ");
-           for(int i=0;i < width;++i){
-               for(int j=0;j < width;++j){
-                   if(grid[i][j]!=null)System.out.printf("%-3d ", grid[i][j].finalCost);
-                   else System.out.print("BL  ");
-               }
-               System.out.println();
-           }
-           System.out.println();
-            
            if(closed[endX][endY]){
                //Trace back the path 
-                System.out.println("Path: ");
+                System.out.println("Computer's Path: ");
                 Node current = grid[endX][endY];
                 System.out.print(current);
                 while(current.parent!=null){
-                    System.out.print(" -> "+current.parent);
+                    System.out.print(" to "+current.parent);
                     current = current.parent;
                 } 
                 System.out.println();
-           }else System.out.println("No possible path");
+           }else System.out.println("No possible path!");
     }
 
 
