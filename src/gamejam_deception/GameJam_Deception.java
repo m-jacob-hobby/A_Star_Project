@@ -38,10 +38,6 @@ public class GameJam_Deception extends JFrame implements ActionListener {
     //private static int startX, startY;
     private static int endX, endY;
     
-    public static void setBlocked(Node n){
-        n = null;
-    }
-    
     /*
         params:
             @current: current node being tested
@@ -54,11 +50,11 @@ public class GameJam_Deception extends JFrame implements ActionListener {
         if(t == null || closed[t.x][t.y])return;
         
         // Get cost and find if node in open set
-        int t_final_cost = t.heuristicCost+cost;
+        int tFinalCost = t.heuristicCost+cost;
         boolean inOpen = open.contains(t);
         
-        if(!inOpen || t_final_cost < t.finalCost){
-            t.finalCost = t_final_cost;
+        if(!inOpen || tFinalCost < t.finalCost){
+            t.finalCost = tFinalCost;
             t.parent = current;
             if(!inOpen)open.add(t);
         }
@@ -126,7 +122,7 @@ public class GameJam_Deception extends JFrame implements ActionListener {
         //timer.schedule(drawBoard(), 0, 5000);
     }
     
-    public boolean inBounds(int inputNum){
+    public static boolean inBounds(int inputNum){
         if((inputNum < height || inputNum < width) && inputNum > 0) return true;
         else return false; 
 
@@ -139,49 +135,49 @@ public class GameJam_Deception extends JFrame implements ActionListener {
         while(true){ 
             current = open.poll();
             if(current==null)break;
-            closed[current.x][current.y]=true; 
+            closed[current.getX()][current.getY()]=true; 
 
             if(current.equals(grid[endX][endY])){
                 return; 
             } 
 
             Node t;  
-            if(current.x-1 >= 0){
-                t = grid[current.x-1][current.y];
+            if(current.getX() - 1 >= 0){
+                t = grid[current.getX()-1][current.getY()];
                 findAndSetCosts(current, t, current.finalCost+V_H_COST); 
 
-                if(current.y-1 >= 0){                      
-                    t = grid[current.x-1][current.y-1];
+                if(current.getY() - 1 >= 0){ //current.y-1 >= 0){                      
+                    t = grid[current.getX() - 1][current.getY() - 1];
                     findAndSetCosts(current, t, current.finalCost+DIAGONAL_COST); 
                 }
 
-                if(current.y+1 < grid[0].length){
-                    t = grid[current.x-1][current.y+1];
+                if(current.getY() + 1 < width){ //current.y+1 < grid[0].length){
+                    t = grid[current.getX() - 1][current.getY() + 1];
                     findAndSetCosts(current, t, current.finalCost+DIAGONAL_COST); 
                 }
             } 
 
-            if(current.y-1 >= 0){
-                t = grid[current.x][current.y-1];
+            if(current.getY() - 1 >= 0){//current.y-1 >= 0){
+                t = grid[current.getX()][current.getY() - 1];
                 findAndSetCosts(current, t, current.finalCost+V_H_COST); 
             }
 
-            if(current.y+1 < grid[0].length){
-                t = grid[current.x][current.y+1];
+            if(current.getY() + 1 < width){//current.y+1 < grid[0].length){
+                t = grid[current.getX()][current.getY() + 1];
                 findAndSetCosts(current, t, current.finalCost+V_H_COST); 
             }
 
-            if(current.x+1 < grid.length){
-                t = grid[current.x+1][current.y];
+            if(current.getX() + 1 < width){ //current.x+1 < grid.length){
+                t = grid[current.getX() + 1][current.getY()];
                 findAndSetCosts(current, t, current.finalCost+V_H_COST); 
 
-                if(current.y-1 >= 0){
-                    t = grid[current.x+1][current.y-1];
+                if(current.getY() - 1 >= 0){//current.y-1 >= 0){
+                    t = grid[current.getX() + 1][current.getY() - 1];
                     findAndSetCosts(current, t, current.finalCost+DIAGONAL_COST); 
                 }
                 
-                if(current.y+1 < grid[0].length){
-                   t = grid[current.x+1][current.y+1];
+                if(current.getY() + 1 < width){ //current.y+1 < grid[0].length){
+                   t = grid[current.getX() + 1][current.getY() + 1];
                     findAndSetCosts(current, t, current.finalCost+DIAGONAL_COST); 
                 }  
             }
@@ -305,12 +301,7 @@ public class GameJam_Deception extends JFrame implements ActionListener {
 
                 return c1.finalCost < c2.finalCost?-1:
                         c1.finalCost > c2.finalCost?1:0;
-            });
-           //Set start position
-           //setStartNode(compX, compY);
-           
-           //Set End Location
-           //setEndNode(endX, endY); 
+            }); 
            
            for(int i=0 ; i < width ; ++i){
               for(int j=0 ; j < height ; ++j){
@@ -349,13 +340,15 @@ public class GameJam_Deception extends JFrame implements ActionListener {
             } 
             System.out.println();
            
+           int pathCounter = 1;
            if(closed[endX][endY]){
                //Trace back the path 
                 System.out.println("Computer's Path: ");
                 Node current = grid[endX][endY];
-                System.out.print(current);
+                System.out.println("1. " + current);
                 while(current.parent!=null){
-                    System.out.print(" to "+current.parent);
+                    pathCounter++;
+                    System.out.println(pathCounter + ". " +current.parent);
                     current = current.parent;
                 } 
                 System.out.println();
