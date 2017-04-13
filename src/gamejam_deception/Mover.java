@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package gamejam_deception;
+package a_star;
 
 /**
  *
@@ -21,6 +21,14 @@ public class Mover {
     public void move(int destX, int destY){
         this.x = destX;
         this.y = destY;
+    }
+    
+    public int getX(){
+        return this.x;
+    }
+    
+    public int getY(){
+        return this.y;
     }
     
 }

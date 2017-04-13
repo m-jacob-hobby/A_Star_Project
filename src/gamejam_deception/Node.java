@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package gamejam_deception;
+package a_star;
 
 /**
  *
@@ -25,7 +25,7 @@ public class Node {
         
     @Override
     public String toString(){
-        return "("+this.x+", "+this.y+")";
+        return "(" + this.x + ", " + this.y + ")";
     }
     
     public static void setBlocked(Node n){
