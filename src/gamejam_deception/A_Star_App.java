@@ -14,9 +14,7 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import java.util.PriorityQueue;
-import java.util.Stack;
-import java.util.TimerTask;
-import java.util.Timer;
+import java.util.ArrayList;
 
 /**
  *
@@ -38,9 +36,7 @@ public class A_Star_App extends JFrame implements ActionListener {
     private  Mover computer;
     
     // Game board parameters
-    private JButton startButton,  // If game has been paused, selecting will resume (inactive when running)
-                    stopButton,
-                    nextButton;   // If game running, pauses; inactive when paused
+    private JButton nextButton;   // If game running, pauses; inactive when paused
     private static JLabel[][] board; // Our game board where we display comp or obstacles
     
     // TODO: these will be set in initialization panel
@@ -145,7 +141,7 @@ public class A_Star_App extends JFrame implements ActionListener {
         
         while(true){ 
             current = open.poll();
-            if(current==null)break;
+            if(current == null)break;
             closed[current.getX()][current.getY()]=true; 
 
             if(current.equals(grid[endX][endY])){
@@ -154,7 +150,7 @@ public class A_Star_App extends JFrame implements ActionListener {
 
             Node n;  
             if(current.getX() - 1 >= 0){
-                n = grid[current.getX()-1][current.getY()];
+                n = grid[current.getX() - 1][current.getY()];
                 findAndSetCosts(current, n, current.finalCost+VERT_HORIZ_COST); 
 
                 if(current.getY() - 1 >= 0){ //current.y-1 >= 0){                      
@@ -248,29 +244,6 @@ public class A_Star_App extends JFrame implements ActionListener {
 }
     
     public void actionPerformed(ActionEvent e){
-        // TODO: implement move call on computer character
-        if (e.getSource() == startButton){
-            play = true;
-            pause = false;
-            startButton.setEnabled(false);
-            stopButton.setEnabled(true);
-        }
-        
-        if (e.getSource() == stopButton){
-            play = false;
-            pause = true;
-            startButton.setEnabled(true);
-            stopButton.setEnabled(false);
-        }
-        
-        if (e.getSource() == nextButton){
-            move();
-            if (navigation.isEnd()){
-                nextButton.setEnabled(false);
-            }
-        }
-        
-        drawBoard();
         
     }
     
@@ -281,7 +254,7 @@ public class A_Star_App extends JFrame implements ActionListener {
             @walls = array of x and y coordinates of walls to be placed on board
         Output debug map of grid
     */
-    public static void run(int width, int height, int[] walls){ //, int startX, int startY, int goalX, int goalY
+    public static void run(int width, int height, ArrayList<Integer> walls){ // int[] walls
             //Reset
            grid = new Node[width][height];
            closed = new boolean[width][height];
@@ -293,10 +266,10 @@ public class A_Star_App extends JFrame implements ActionListener {
                         c1.finalCost > c2.finalCost?1:0;
             }); 
            
-           for(int i=0 ; i < width ; ++i){
-              for(int j=0 ; j < height ; ++j){
-                  grid[i][j] = new Node(i, j, false);
-                  grid[i][j].setHeuristic(endX, endY);
+           for(int x=0 ; x < width ; ++x){
+              for(int y=0 ; y < height ; ++y){
+                  grid[x][y] = new Node(x, y, false);
+                  grid[x][y].setHeuristic(endX, endY);
               }
            }
            grid[compX][compY].finalCost = 0;
@@ -305,13 +278,15 @@ public class A_Star_App extends JFrame implements ActionListener {
              Set walls cells. Simply set the cell values to null
              for walls cells.
            */
-           for(int i=0; i < walls.length ;i+=2){
-               int x = walls[i];
-               int y = walls[i+1];
+           for(int i=0; i < walls.size() ; i+=2){
+               int x = walls.get(i);                                            //walls[i];
+               int y = walls.get(i + 1);                                        //walls[i+1];
                grid[x][y] = null;
            }
            
            setOpen();
+           
+           // For DEBUGGING: view map with values, start, end, and walls in console
            System.out.println("Key: ");
            System.out.println(" O  ... Computer start position");
            System.out.println(" X  ... Goal position");
@@ -319,20 +294,20 @@ public class A_Star_App extends JFrame implements ActionListener {
            System.out.println(" #  ... Node cost");
            //Display initial map
            System.out.println("\nGrid: ");
-            for(int i=0; i < width ;++i){
-                for(int j=0; j < height ;++j){
-                   if(i == compX && j == compY)System.out.print(" O  "); //Start point
-                   else if(i == endX && j == endY)System.out.print(" X  ");  //Goal
-                   else if(grid[i][j]!=null)System.out.printf("%-3d ", grid[i][j].finalCost);
+            for(int x=0; x < width ;++x){
+                for(int y=0; y < height ;++y){
+                   if(x == compX && y == compY)System.out.print(" O  ");        //Start point
+                   else if(x == endX && y == endY)System.out.print(" X  ");     //Goal
+                   else if(grid[x][y]!=null)System.out.printf("%-3d ", grid[x][y].finalCost);
                    else System.out.print("/// "); 
                 }
                 System.out.println();
             } 
             System.out.println();
             
-            
-           int pathCounter = 1;
-           if(closed[endX][endY]){
+            // For DEBUGGING: Outputs the path from end to start that is the shortest traversable path
+            int pathCounter = 1;
+            if(closed[endX][endY]){
                //Trace back the path 
                 System.out.println("Computer's Path: ");
                 Node current = grid[endX][endY];
@@ -348,27 +323,8 @@ public class A_Star_App extends JFrame implements ActionListener {
                 } 
                 navigation.close();
                 System.out.println();
-           }else System.out.println("No possible path!");
+            }else System.out.println("No possible path!");
            
-    }
-    
-    public static void moveComputer(){
-        Timer timer = new Timer();
-        timer.schedule(new moveComputerTask(), 2000);
-    }
-    
-    
-    static class moveComputerTask extends TimerTask{
-        public void run(){
-            if(play){
-                if(!navigation.isEnd()){
-                    board[navigation.getX()][navigation.getY()].setBackground(Color.BLUE);
-                    navigation.getNext();
-                    board[navigation.getX()][navigation.getY()].setBackground(Color.GREEN);
-                }
-                
-            }
-        }
     }
     
     public void move(){
@@ -391,24 +347,25 @@ public class A_Star_App extends JFrame implements ActionListener {
 
         width = 10;
         height = 10;
-        compX = 0;
-        compY = 0;
-        endX = 9;
-        compY = 9;
         
-        StartupPanel initialize = new StartupPanel(height, width);
-        
-        while(!initialize.getIsFinished()){
-            if (!initialize.getWait())
+        StartupPanel initialize = new StartupPanel(height, width);              // Builds the initial panel. This panel will prompt
+                                                                                // the user to determine start, goal and all wall blocks        
+        while(!initialize.getIsFinished()){                                     // that will be utilized. Runs until finished and won't        
+            if (!initialize.getWait())                                          // setFrame until after user selects next block.
                 initialize.setFrame();
         }
         
-        int[] walls = new int[]{4,3,4,4,4,5,4,6,4,7,4,8,0,3,1,3,2,3,3,3,5,6,6,6,8,6,9,6,9,1,8,1,7,1,6,1,5,1,4,1};
+        ArrayList<Integer> wallList = initialize.getWalls();
+        compX = initialize.getStartX();                                         // Start and end coordinates from the initial panel
+        compY = initialize.getStartY();                                         // and selected by the users
+        endX = initialize.getGoalX();
+        endY = initialize.getGoalY();
         
-        run(width, height, walls); //, compX, compY, endX, endY
+        //int[] walls = new int[]{4,3,4,4,4,5,4,6,4,7,4,8,0,3,1,3,2,3,3,3,5,6,6,6,8,6,9,6,9,1,8,1,7,1,6,1,5,1,4,1};
+        
+        run(width, height, wallList);
         
         A_Star_App d = new A_Star_App();
-        //moveComputer();
         
     }
     
