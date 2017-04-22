@@ -20,11 +20,12 @@ import java.util.ArrayList;
  *
  * @author MJHobby
  */
-public class A_Star_App extends JFrame implements ActionListener {
+public class A_Star_App extends JFrame{
 
+    /*
     // for heuristic cost calculations
-    public static final int DIAGONAL_COST = 14;
-    public static final int VERT_HORIZ_COST = 10;
+    private static final int DIAGONAL_COST = 14;
+    private static final int VERT_HORIZ_COST = 10;
     
     // open and closed list to track checked and unchecked nodes
     static PriorityQueue<Node> open;
@@ -45,8 +46,9 @@ public class A_Star_App extends JFrame implements ActionListener {
     public static int compX = 0;
     public static int compY = 0; // Computer start position x and y coordinates
     private static int endX, endY;
-    public static boolean play ,pause;
+    */
     
+    /*
     public A_Star_App(){
 
         // Panels for the board grid, and panel for buttons
@@ -94,24 +96,19 @@ public class A_Star_App extends JFrame implements ActionListener {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         drawBoard();
-        
-        // board and buttons not visible until initial panel filled out and completed
-        //boardPanel.setVisible(false);
-        //buttonPanel.setVisible(false);
-        
-        //Timer timer = new Timer();
-        //timer.schedule(drawBoard(), 0, 5000);
-    }
-    
-    public static boolean inBounds(int inputNum){
-        if((inputNum < height || inputNum < width) && inputNum > 0) return true;
-        else return false; 
 
     }
-    
-    public static void setInitialPanel(){
-        
+    */
+     
+    /*
+    // Check if the input is within the game board boundaries
+    public static boolean inBounds(int inputNum){
+        boolean result = false;
+        if((inputNum < height || inputNum < width) && inputNum > 0) result = true;
+        return result; 
+
     }
+    */
     
     /*
         @params:
@@ -120,6 +117,7 @@ public class A_Star_App extends JFrame implements ActionListener {
             cost: the cost of total travel to current
         
     */
+    /*
     static void findAndSetCosts(Node current, Node t, int cost){
         // Add to closed if null node
         if(t == null || closed[t.getX()][t.getY()])return;
@@ -134,7 +132,9 @@ public class A_Star_App extends JFrame implements ActionListener {
             if(!inOpen)open.add(t);
         }
     }
+    */
     
+    /*
     public static void setOpen(){
         open.add(grid[compX][compY]);
         Node current;
@@ -190,8 +190,10 @@ public class A_Star_App extends JFrame implements ActionListener {
             }
         } 
     }
+    */
     
     // Display player, walls, and other pieces
+    /*
     public void drawBoard(){
 
         for (int x = 0 ; x < width ; x++){
@@ -217,35 +219,7 @@ public class A_Star_App extends JFrame implements ActionListener {
         }
    
     }
-    
-    
-    // TODO: implement sound effects
-    public void playSound(String soundFilePath, boolean isMP3) {
-        
-    // .wav files
-    try {
-        AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File("D:/MusicPlayer/fml.mp3").getAbsoluteFile());
-        Clip clip = AudioSystem.getClip();
-        clip.open(audioInputStream);
-        clip.start();
-    } catch(Exception ex) {
-        System.out.println("Error with playing sound.");
-        ex.printStackTrace();
-    }
-    
-    // mp3 files
-    /*
-    String bip = "bip.mp3";
-    Media hit = new Media(new File(bip).toURI().toString());
-    MediaPlayer mediaPlayer = new MediaPlayer(hit);
-    mediaPlayer.play();
     */
-    
-}
-    
-    public void actionPerformed(ActionEvent e){
-        
-    }
     
     /*
         params:
@@ -254,6 +228,7 @@ public class A_Star_App extends JFrame implements ActionListener {
             @walls = array of x and y coordinates of walls to be placed on board
         Output debug map of grid
     */
+    /*
     public static void run(int width, int height, ArrayList<Integer> walls){ // int[] walls
             //Reset
            grid = new Node[width][height];
@@ -274,10 +249,8 @@ public class A_Star_App extends JFrame implements ActionListener {
            }
            grid[compX][compY].finalCost = 0;
            
-           /*
-             Set walls cells. Simply set the cell values to null
-             for walls cells.
-           */
+             //Set walls cells. Simply set the cell values to null
+             //for walls cells.
            for(int i=0; i < walls.size() ; i+=2){
                int x = walls.get(i);                                            //walls[i];
                int y = walls.get(i + 1);                                        //walls[i+1];
@@ -326,27 +299,30 @@ public class A_Star_App extends JFrame implements ActionListener {
             }else System.out.println("No possible path!");
            
     }
+    */
     
+    /*
     public void move(){
         if(!navigation.isEnd()){
-            //board[navigation.getX()][navigation.getY()].setBackground(Color.BLUE);
             navigation.getNext();
             computer.move(navigation.getX(), navigation.getY());
-            //board[navigation.getX()][navigation.getY()].setBackground(Color.GREEN);
         } else {
             nextButton.setEnabled(false);
         }
         drawBoard();
     }
-
+    */
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        
+        Path navigation = new Path();
+        Mover computer;
 
-        width = 10;
-        height = 10;
+        int width = 15;
+        int height = 15;
         
         StartupPanel initialize = new StartupPanel(height, width);              // Builds the initial panel. This panel will prompt
                                                                                 // the user to determine start, goal and all wall blocks        
@@ -355,15 +331,15 @@ public class A_Star_App extends JFrame implements ActionListener {
                 initialize.setFrame();
         }
         
-        ArrayList<Integer> wallList = initialize.getWalls();
-        compX = initialize.getStartX();                                         // Start and end coordinates from the initial panel
-        compY = initialize.getStartY();                                         // and selected by the users
-        endX = initialize.getGoalX();
-        endY = initialize.getGoalY();
+        //ArrayList<Integer> wallList = initialize.getWalls();
+        //compX = initialize.getStartX();                                         // Start and end coordinates from the initial panel
+        //compY = initialize.getStartY();                                         // and selected by the users
+        //endX = initialize.getGoalX();
+        //endY = initialize.getGoalY();
         
-        //int[] walls = new int[]{4,3,4,4,4,5,4,6,4,7,4,8,0,3,1,3,2,3,3,3,5,6,6,6,8,6,9,6,9,1,8,1,7,1,6,1,5,1,4,1};
+        computer = new Mover(initialize.getStartX(), initialize.getStartY());
         
-        run(width, height, wallList);
+        initialize.run(computer.getX(), computer.getY(), navigation);
         
         A_Star_App d = new A_Star_App();
         
